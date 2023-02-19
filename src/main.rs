@@ -6,6 +6,7 @@ use sdl2::pixels::Color;
 
 mod particle;
 mod quadtree;
+mod quadtree_visualizer;
 
 fn main() -> Result<(), String> {
     let width = 800;
@@ -65,9 +66,9 @@ fn main() -> Result<(), String> {
 
     // Initialize Particles
     let mut particles: Vec<Particle> = Vec::new();
-    particles.append(&mut create(500, ParticleColor::Yellow, Color::YELLOW));
-    particles.append(&mut create(500, ParticleColor::Red, Color::RED));
-    particles.append(&mut create(500, ParticleColor::Green, Color::GREEN));
+    particles.append(&mut create(50, ParticleColor::Yellow, Color::YELLOW));
+    particles.append(&mut create(50, ParticleColor::Red, Color::RED));
+    particles.append(&mut create(50, ParticleColor::Green, Color::GREEN));
 
     // Main Loop
     let mut running = true;
@@ -98,6 +99,7 @@ fn main() -> Result<(), String> {
         // Draw
         canvas.set_draw_color(Color::BLACK);
         canvas.clear();
+        quadtree_visualizer::draw_quadtree(&mut canvas, &tree);
         for p in &particles {
             p.draw(&mut canvas);
         }

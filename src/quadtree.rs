@@ -40,16 +40,17 @@ impl AABB {
 }
 
 pub struct QuadTree<T> {
+    // TODO maybe make the capacity a const
     capacity: usize,
-    boundary: AABB,
+    pub boundary: AABB,
     points: Vec<XY>,
     points_data: Vec<T>,
 
     // Children
-    north_west: Option<Box<QuadTree<T>>>,
-    north_east: Option<Box<QuadTree<T>>>,
-    south_west: Option<Box<QuadTree<T>>>,
-    south_east: Option<Box<QuadTree<T>>>,
+    pub north_west: Option<Box<QuadTree<T>>>,
+    pub north_east: Option<Box<QuadTree<T>>>,
+    pub south_west: Option<Box<QuadTree<T>>>,
+    pub south_east: Option<Box<QuadTree<T>>>,
 }
 
 impl<T> QuadTree<T> {
@@ -165,7 +166,7 @@ impl<T> QuadTree<T> {
             AABB {
                 center: XY {
                     x: self.boundary.center.x + self.boundary.half_dimension / 2.0,
-                    y: self.boundary.center.y + -self.boundary.half_dimension / 2.0,
+                    y: self.boundary.center.y + self.boundary.half_dimension / 2.0,
                 },
                 half_dimension: self.boundary.half_dimension / 2.0,
             },
