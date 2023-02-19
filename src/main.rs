@@ -1,5 +1,5 @@
 use particle::{Particle, ParticleColor, ParticleRule};
-use quadtree::XY;
+use quadtree::{QuadTree, AABB, XY};
 use rand::prelude::*;
 use sdl2::event::Event;
 use sdl2::pixels::Color;
@@ -84,6 +84,11 @@ fn main() -> Result<(), String> {
 
         // Update
         let world: &Vec<Particle> = &particles.clone();
+        let mut tree: QuadTree<Particle> = QuadTree::new(4, AABB::new(400.0, 400.0, 400.0));
+        for wp in world {
+            tree.insert(wp.pos, *wp);
+        }
+
         for p in &mut particles {
             for r in &rules {
                 r.run(p, world)
