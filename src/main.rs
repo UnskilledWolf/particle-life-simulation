@@ -85,13 +85,13 @@ fn main() -> Result<(), String> {
 
         // Update
         let world: &Vec<Particle> = &particles.clone();
-        let mut tree: QuadTree<Particle> = QuadTree::new(4, AABB::new(400.0, 400.0, 400.0));
+        let mut tree: QuadTree<Particle> = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
         for wp in world {
             tree.insert(wp.pos, *wp);
         }
 
         for p in &mut particles {
-            let range = AABB::new(p.pos.x, p.pos.y, 40.0);
+            let range = AABB::new(p.pos.x, p.pos.y, 80.0);
             for r in &rules {
                 let in_range = tree.query_range(&range);
                 r.run(p, &in_range);

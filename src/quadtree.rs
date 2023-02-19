@@ -39,9 +39,9 @@ impl AABB {
     }
 }
 
+const QT_NODE_CAPACITY: usize = 4;
+
 pub struct QuadTree<T> {
-    // TODO maybe make the capacity a const
-    capacity: usize,
     pub boundary: AABB,
     points: Vec<XY>,
     points_data: Vec<T>,
@@ -54,12 +54,11 @@ pub struct QuadTree<T> {
 }
 
 impl<T> QuadTree<T> {
-    pub fn new(capacity: usize, boundary: AABB) -> QuadTree<T> {
+    pub fn new(boundary: AABB) -> QuadTree<T> {
         QuadTree {
-            capacity,
             boundary,
-            points: Vec::with_capacity(capacity),
-            points_data: Vec::with_capacity(capacity),
+            points: Vec::with_capacity(QT_NODE_CAPACITY),
+            points_data: Vec::with_capacity(QT_NODE_CAPACITY),
             north_west: Option::None,
             north_east: Option::None,
             south_west: Option::None,
@@ -124,7 +123,7 @@ impl<T> QuadTree<T> {
 
     // Insert without checking if the point can be inserted.
     pub fn insert_internal(&mut self, p: XY, data: T) -> bool {
-        if self.points.len() < self.capacity && self.north_west.is_none() {
+        if self.points.len() < QT_NODE_CAPACITY && self.north_west.is_none() {
             //TODO Try to see how push_within_capacity works.
             self.points.push(p);
             self.points_data.push(data);
@@ -176,46 +175,34 @@ impl<T> QuadTree<T> {
     }
 
     fn subdivide(&mut self) {
-        self.north_west = Some(Box::new(QuadTree::new(
-            self.capacity,
-            AABB {
-                center: XY {
-                    x: self.boundary.center.x - self.boundary.half_dimension / 2.0,
-                    y: self.boundary.center.y - self.boundary.half_dimension / 2.0,
-                },
-                half_dimension: self.boundary.half_dimension / 2.0,
+        self.north_west = Some(Box::new(QuadTree::new(AABB {
+            center: XY {
+                x: self.boundary.center.x - self.boundary.half_dimension / 2.0,
+                y: self.boundary.center.y - self.boundary.half_dimension / 2.0,
             },
-        )));
-        self.north_east = Some(Box::new(QuadTree::new(
-            self.capacity,
-            AABB {
-                center: XY {
-                    x: self.boundary.center.x + self.boundary.half_dimension / 2.0,
-                    y: self.boundary.center.y - self.boundary.half_dimension / 2.0,
-                },
-                half_dimension: self.boundary.half_dimension / 2.0,
+            half_dimension: self.boundary.half_dimension / 2.0,
+        })));
+        self.north_east = Some(Box::new(QuadTree::new(AABB {
+            center: XY {
+                x: self.boundary.center.x + self.boundary.half_dimension / 2.0,
+                y: self.boundary.center.y - self.boundary.half_dimension / 2.0,
             },
-        )));
-        self.south_west = Some(Box::new(QuadTree::new(
-            self.capacity,
-            AABB {
-                center: XY {
-                    x: self.boundary.center.x - self.boundary.half_dimension / 2.0,
-                    y: self.boundary.center.y + self.boundary.half_dimension / 2.0,
-                },
-                half_dimension: self.boundary.half_dimension / 2.0,
+            half_dimension: self.boundary.half_dimension / 2.0,
+        })));
+        self.south_west = Some(Box::new(QuadTree::new(AABB {
+            center: XY {
+                x: self.boundary.center.x - self.boundary.half_dimension / 2.0,
+                y: self.boundary.center.y + self.boundary.half_dimension / 2.0,
             },
-        )));
-        self.south_east = Some(Box::new(QuadTree::new(
-            self.capacity,
-            AABB {
-                center: XY {
-                    x: self.boundary.center.x + self.boundary.half_dimension / 2.0,
-                    y: self.boundary.center.y + self.boundary.half_dimension / 2.0,
-                },
-                half_dimension: self.boundary.half_dimension / 2.0,
+            half_dimension: self.boundary.half_dimension / 2.0,
+        })));
+        self.south_east = Some(Box::new(QuadTree::new(AABB {
+            center: XY {
+                x: self.boundary.center.x + self.boundary.half_dimension / 2.0,
+                y: self.boundary.center.y + self.boundary.half_dimension / 2.0,
             },
-        )));
+            half_dimension: self.boundary.half_dimension / 2.0,
+        })));
     }
 }
 
