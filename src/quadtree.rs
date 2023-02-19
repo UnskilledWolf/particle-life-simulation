@@ -75,7 +75,52 @@ impl<T> QuadTree<T> {
         }
     }
 
-    pub fn query_range(range: AABB) {}
+    pub fn query_range(&self, range: &AABB) -> Vec<&T> {
+        let mut results: Vec<&T> = Vec::new();
+
+        // Return nothing if the range does not intersect
+        if !self.boundary.intersects_aabb(range) {
+            return results;
+        }
+
+        // Scan this level
+        for (i, p) in self.points.iter().enumerate() {
+            if range.contains_point(&p) {
+                results.push(&self.points_data[i]);
+            }
+        }
+
+        //TODO find a good way to put this in functions
+        match &self.north_west {
+            Some(qt) => {
+                results.append(&mut qt.query_range(range));
+            }
+            None => {}
+        }
+
+        match &self.north_east {
+            Some(qt) => {
+                results.append(&mut qt.query_range(range));
+            }
+            None => {}
+        }
+
+        match &self.south_west {
+            Some(qt) => {
+                results.append(&mut qt.query_range(range));
+            }
+            None => {}
+        }
+
+        match &self.south_east {
+            Some(qt) => {
+                results.append(&mut qt.query_range(range));
+            }
+            None => {}
+        }
+
+        return results;
+    }
 
     // Insert without checking if the point can be inserted.
     pub fn insert_internal(&mut self, p: XY, data: T) -> bool {

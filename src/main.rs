@@ -66,9 +66,9 @@ fn main() -> Result<(), String> {
 
     // Initialize Particles
     let mut particles: Vec<Particle> = Vec::new();
-    particles.append(&mut create(50, ParticleColor::Yellow, Color::YELLOW));
-    particles.append(&mut create(50, ParticleColor::Red, Color::RED));
-    particles.append(&mut create(50, ParticleColor::Green, Color::GREEN));
+    particles.append(&mut create(500, ParticleColor::Yellow, Color::YELLOW));
+    particles.append(&mut create(500, ParticleColor::Red, Color::RED));
+    particles.append(&mut create(500, ParticleColor::Green, Color::GREEN));
 
     // Main Loop
     let mut running = true;
@@ -91,8 +91,10 @@ fn main() -> Result<(), String> {
         }
 
         for p in &mut particles {
+            let range = AABB::new(p.pos.x, p.pos.y, 40.0);
             for r in &rules {
-                r.run(p, world)
+                let in_range = tree.query_range(&range);
+                r.run(p, &in_range);
             }
         }
 

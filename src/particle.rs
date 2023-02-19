@@ -38,7 +38,7 @@ pub struct ParticleRule {
 }
 
 impl ParticleRule {
-    pub fn run(&self, p1: &mut Particle, particles: &Vec<Particle>) {
+    pub fn run(&self, p1: &mut Particle, particles: &Vec<&Particle>) {
         if p1.color != self.from {
             return;
         }
