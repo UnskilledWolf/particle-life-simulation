@@ -1,5 +1,7 @@
 use sdl2::{gfx::primitives::DrawRenderer, pixels::Color, render::Canvas, video::Window};
 
+use crate::quadtree::XY;
+
 #[derive(Clone, Copy, PartialEq)]
 pub enum ParticleColor {
     Yellow,
@@ -9,24 +11,30 @@ pub enum ParticleColor {
 
 #[derive(Clone, Copy)]
 pub struct Particle {
-    pub x: i16,
-    pub y: i16,
-    pub vx: f64,
-    pub vy: f64,
+    pub pos: XY,
+    pub vx: f32,
+    pub vy: f32,
     pub draw_color: Color,
     pub color: ParticleColor,
 }
 
 impl Particle {
     pub fn draw(&self, canvas: &mut Canvas<Window>) {
-        DrawRenderer::filled_circle(canvas, self.x, self.y, 2, self.draw_color).unwrap();
+        DrawRenderer::filled_circle(
+            canvas,
+            self.pos.x as i16,
+            self.pos.y as i16,
+            2,
+            self.draw_color,
+        )
+        .unwrap();
     }
 }
 
 pub struct ParticleRule {
     pub from: ParticleColor,
     pub to: ParticleColor,
-    pub g: f64,
+    pub g: f32,
 }
 
 impl ParticleRule {
@@ -35,14 +43,14 @@ impl ParticleRule {
             return;
         }
 
-        let mut fx: f64 = 0.0;
-        let mut fy: f64 = 0.0;
+        let mut fx: f32 = 0.0;
+        let mut fy: f32 = 0.0;
 
         for p2 in particles {
-            let dx: f64 = (p1.x - p2.x) as f64;
-            let dy: f64 = (p1.y - p2.y) as f64;
+            let dx: f32 = (p1.pos.x - p2.pos.x) as f32;
+            let dy: f32 = (p1.pos.y - p2.pos.y) as f32;
 
-            let d: f64 = f64::sqrt((dx * dx + dy * dy) as f64) + 1.0;
+            let d: f32 = f32::sqrt((dx * dx + dy * dy) as f32) + 1.0;
             if d > 0.0 && d < 175.0 {
                 let f = self.g * 1.0 / d;
                 fx += f * dx;
@@ -53,14 +61,14 @@ impl ParticleRule {
         p1.vx = (p1.vx + fx) * 0.5;
         p1.vy = (p1.vy + fy) * 0.5;
 
-        if p1.x <= 20 || p1.x >= 800 - 20 {
+        if p1.pos.x <= 20.0 || p1.pos.x >= 780.0 {
             p1.vx *= -1.0;
         }
-        if p1.y <= 20 || p1.y >= 800 - 20 {
+        if p1.pos.y <= 20.0 || p1.pos.y >= 780.0 {
             p1.vx *= -1.0;
         }
 
-        p1.x += p1.vx as i16;
-        p1.y += p1.vy as i16;
+        p1.pos.x += p1.vx;
+        p1.pos.y += p1.vy;
     }
 }

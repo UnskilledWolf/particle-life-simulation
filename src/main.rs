@@ -1,9 +1,11 @@
+use particle::{Particle, ParticleColor, ParticleRule};
+use quadtree::XY;
+use rand::prelude::*;
 use sdl2::event::Event;
 use sdl2::pixels::Color;
 
 mod particle;
-use particle::{Particle, ParticleColor, ParticleRule};
-use rand::prelude::*;
+mod quadtree;
 
 fn main() -> Result<(), String> {
     let width = 800;
@@ -107,12 +109,14 @@ fn create(number: i32, color: ParticleColor, draw_color: Color) -> Vec<Particle>
 
     for _ in 0..number {
         group.push(Particle {
-            x: rng.gen_range(0..800),
-            y: rng.gen_range(0..800),
+            pos: XY {
+                x: rng.gen_range(0..800) as f32,
+                y: rng.gen_range(0..800) as f32,
+            },
             vx: 0.0,
             vy: 0.0,
-            draw_color: draw_color,
-            color: color,
+            draw_color,
+            color,
         })
     }
 
