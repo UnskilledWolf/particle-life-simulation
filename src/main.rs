@@ -67,8 +67,12 @@ fn main() -> Result<(), String> {
     // Initialize Particles
     let mut particles: Vec<Particle> = Vec::new();
     particles.append(&mut create(500, ParticleColor::Yellow, Color::YELLOW));
+
     particles.append(&mut create(500, ParticleColor::Red, Color::RED));
+
     particles.append(&mut create(500, ParticleColor::Green, Color::GREEN));
+
+    let mut test_query = AABB::new(0.0, 0.0, 50.0);
 
     // Main Loop
     let mut running = true;
@@ -78,7 +82,10 @@ fn main() -> Result<(), String> {
             match event {
                 Event::Quit { .. } => running = false,
 
-                // Event::MouseButtonDown { x, y, .. } => {}
+                Event::MouseButtonDown { x, y, .. } => {
+                    test_query.center.x = x as f32;
+                    test_query.center.y = y as f32;
+                }
                 _ => {}
             }
         }
@@ -105,6 +112,7 @@ fn main() -> Result<(), String> {
         for p in &particles {
             p.draw(&mut canvas);
         }
+        quadtree_visualizer::draw_query(&mut canvas, &tree, &test_query);
 
         canvas.present();
     }
