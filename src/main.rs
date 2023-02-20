@@ -67,12 +67,11 @@ fn main() -> Result<(), String> {
     // Initialize Particles
     let mut particles: Vec<Particle> = Vec::new();
     particles.append(&mut create(500, ParticleColor::Yellow, Color::YELLOW));
-
     particles.append(&mut create(500, ParticleColor::Red, Color::RED));
-
     particles.append(&mut create(500, ParticleColor::Green, Color::GREEN));
 
-    let mut test_query = AABB::new(0.0, 0.0, 50.0);
+    let mut test_query = AABB::new(0.0, 0.0, 40.0);
+    let mut range = AABB::new(0.0, 0.0, 40.0);
 
     // Main Loop
     let mut running = true;
@@ -90,28 +89,36 @@ fn main() -> Result<(), String> {
             }
         }
 
-        // Update
-        let world: &Vec<Particle> = &particles.clone();
+        // // Update
+        // let world: &Vec<Particle> = &particles.clone();
+        // let mut tree: QuadTree<Particle> = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
+        // for wp in world {
+        //     tree.insert(wp.pos, *wp);
+        // }
+
+        // Update Tree
         let mut tree: QuadTree<Particle> = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
-        for wp in world {
-            tree.insert(wp.pos, *wp);
+        for p in &particles {
+            let pc = p.clone();
+            tree.insert(pc.pos, pc);
         }
 
+        // Draw and update particles
+        canvas.set_draw_color(Color::BLACK);
+        canvas.clear();
+
         for p in &mut particles {
-            let range = AABB::new(p.pos.x, p.pos.y, 80.0);
+            range.center.x = p.pos.x;
+            range.center.y = p.pos.y;
             for r in &rules {
                 let in_range = tree.query_range(&range);
                 r.run(p, &in_range);
             }
-        }
 
-        // Draw
-        canvas.set_draw_color(Color::BLACK);
-        canvas.clear();
-        quadtree_visualizer::draw_quadtree(&mut canvas, &tree);
-        for p in &particles {
             p.draw(&mut canvas);
         }
+
+        quadtree_visualizer::draw_quadtree(&mut canvas, &tree);
         quadtree_visualizer::draw_query(&mut canvas, &tree, &test_query);
 
         canvas.present();
