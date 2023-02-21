@@ -1,10 +1,11 @@
 use particle::{Particle, ParticleColor, ParticleRule};
-use quadtree::{QuadTree, AABB, XY};
-use rand::prelude::*;
+use particle_world::ParticleWorld;
+use quadtree::AABB;
 use sdl2::event::Event;
 use sdl2::pixels::Color;
 
 mod particle;
+mod particle_world;
 mod quadtree;
 mod quadtree_visualizer;
 
@@ -64,14 +65,26 @@ fn main() -> Result<(), String> {
         },
     ];
 
-    // Initialize Particles
+    // Initialize World
     let mut particles: Vec<Particle> = Vec::new();
-    particles.append(&mut create(500, ParticleColor::Yellow, Color::YELLOW));
-    particles.append(&mut create(500, ParticleColor::Red, Color::RED));
-    particles.append(&mut create(500, ParticleColor::Green, Color::GREEN));
+    particles.append(&mut particle_world::create_particles(
+        50,
+        ParticleColor::Yellow,
+        Color::YELLOW,
+    ));
+    particles.append(&mut particle_world::create_particles(
+        50,
+        ParticleColor::Red,
+        Color::RED,
+    ));
+    particles.append(&mut particle_world::create_particles(
+        50,
+        ParticleColor::Green,
+        Color::GREEN,
+    ));
 
-    let mut test_query = AABB::new(0.0, 0.0, 40.0);
-    let mut range = AABB::new(0.0, 0.0, 40.0);
+    let mut world = ParticleWorld::new(particles, 80.0);
+    let mut test_query = AABB::new(0.0, 0.0, 80.0);
 
     // Main Loop
     let mut running = true;
@@ -89,60 +102,16 @@ fn main() -> Result<(), String> {
             }
         }
 
-        // // Update
-        // let world: &Vec<Particle> = &particles.clone();
-        // let mut tree: QuadTree<Particle> = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
-        // for wp in world {
-        //     tree.insert(wp.pos, *wp);
-        // }
+        world.update(&rules);
 
-        // Update Tree
-        let mut tree: QuadTree<Particle> = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
-        for p in &particles {
-            let pc = p.clone();
-            tree.insert(pc.pos, pc);
-        }
-
-        // Draw and update particles
         canvas.set_draw_color(Color::BLACK);
         canvas.clear();
 
-        for p in &mut particles {
-            range.center.x = p.pos.x;
-            range.center.y = p.pos.y;
-            for r in &rules {
-                let in_range = tree.query_range(&range);
-                r.run(p, &in_range);
-            }
-
-            p.draw(&mut canvas);
-        }
-
-        quadtree_visualizer::draw_quadtree(&mut canvas, &tree);
-        quadtree_visualizer::draw_query(&mut canvas, &tree, &test_query);
+        world.draw(&mut canvas);
+        world.draw_debug(&mut canvas, &test_query);
 
         canvas.present();
     }
 
     Ok(())
-}
-
-fn create(number: i32, color: ParticleColor, draw_color: Color) -> Vec<Particle> {
-    let mut group: Vec<Particle> = Vec::new();
-    let mut rng = rand::thread_rng();
-
-    for _ in 0..number {
-        group.push(Particle {
-            pos: XY {
-                x: rng.gen_range(0..800) as f32,
-                y: rng.gen_range(0..800) as f32,
-            },
-            vx: 0.0,
-            vy: 0.0,
-            draw_color,
-            color,
-        })
-    }
-
-    return group;
 }
