@@ -1,3 +1,5 @@
+pub mod visualizer;
+
 const QT_NODE_CAPACITY: usize = 6;
 
 // Simple coordinate object to represent points and vectors

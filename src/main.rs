@@ -8,7 +8,6 @@ use std::time::Instant;
 mod particle;
 mod particle_world;
 mod quadtree;
-mod quadtree_visualizer;
 
 fn main() -> Result<(), String> {
     let width = 800;

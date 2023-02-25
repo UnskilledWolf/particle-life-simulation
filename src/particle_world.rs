@@ -3,8 +3,8 @@ use sdl2::{pixels::Color, render::Canvas, video::Window};
 
 use crate::{
     particle::{Particle, ParticleColor, ParticleRule},
+    quadtree::visualizer,
     quadtree::{QuadTree, AABB, XY},
-    quadtree_visualizer,
 };
 
 pub struct ParticleWorld {
@@ -52,8 +52,8 @@ impl ParticleWorld {
     }
 
     pub fn draw_debug(&self, canvas: &mut Canvas<Window>, test_query: &AABB) {
-        quadtree_visualizer::draw_quadtree(canvas, &self.tree);
-        quadtree_visualizer::draw_query(canvas, &self.tree, test_query);
+        visualizer::draw_quadtree(canvas, &self.tree);
+        visualizer::draw_query(canvas, &self.tree, test_query);
     }
 }
 
