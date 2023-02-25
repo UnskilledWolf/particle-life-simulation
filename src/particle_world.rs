@@ -26,13 +26,6 @@ impl ParticleWorld {
     }
 
     pub fn update(&mut self, rules: &[ParticleRule]) {
-        // // Update
-        // let world: &Vec<Particle> = &particles.clone();
-        // let mut tree: QuadTree<Particle> = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
-        // for wp in world {
-        //     tree.insert(wp.pos, *wp);
-        // }
-
         // Update Tree
         self.tree = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
         for p in &self.particles {

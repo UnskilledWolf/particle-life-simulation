@@ -3,6 +3,7 @@ use particle_world::ParticleWorld;
 use quadtree::AABB;
 use sdl2::event::Event;
 use sdl2::pixels::Color;
+use std::time::Instant;
 
 mod particle;
 mod particle_world;
@@ -68,28 +69,30 @@ fn main() -> Result<(), String> {
     // Initialize World
     let mut particles: Vec<Particle> = Vec::new();
     particles.append(&mut particle_world::create_particles(
-        50,
+        500,
         ParticleColor::Yellow,
         Color::YELLOW,
     ));
     particles.append(&mut particle_world::create_particles(
-        50,
+        500,
         ParticleColor::Red,
         Color::RED,
     ));
     particles.append(&mut particle_world::create_particles(
-        50,
+        500,
         ParticleColor::Green,
         Color::GREEN,
     ));
 
     let mut world = ParticleWorld::new(particles, 80.0);
     let mut test_query = AABB::new(0.0, 0.0, 80.0);
+    let mut avg_time: u128 = 0;
 
     // Main Loop
     let mut running = true;
     while running {
         // Events
+        let start = Instant::now();
         for event in event_queue.poll_iter() {
             match event {
                 Event::Quit { .. } => running = false,
@@ -111,7 +114,20 @@ fn main() -> Result<(), String> {
         world.draw_debug(&mut canvas, &test_query);
 
         canvas.present();
+
+        let duration = start.elapsed();
+
+        println!("Time elapsed in frame is: {:?}", duration);
+
+        // Calculate average time
+        if avg_time > 0 {
+            avg_time = (avg_time + duration.as_millis()) / 2;
+        } else {
+            avg_time = duration.as_millis();
+        }
     }
+
+    println!("Average frame time is: {:?}ms", avg_time);
 
     Ok(())
 }
