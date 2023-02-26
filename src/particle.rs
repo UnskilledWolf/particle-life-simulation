@@ -2,6 +2,8 @@ use sdl2::{gfx::primitives::DrawRenderer, pixels::Color, render::Canvas, video::
 
 use crate::quadtree::XY;
 
+pub const MAX_DISTANCE: f32 = 80.0;
+
 #[derive(Clone, Copy, PartialEq)]
 pub enum ParticleColor {
     Yellow,
@@ -77,7 +79,7 @@ impl ParticleRule {
             let dy: f32 = (p1.pos.y - p2.pos.y) as f32;
 
             let d: f32 = distances[i];
-            if d > 0.0 && d < 175.0 {
+            if d > 0.0 && d < MAX_DISTANCE {
                 let f = self.g * 1.0 / d;
                 fx += f * dx;
                 fy += f * dy;

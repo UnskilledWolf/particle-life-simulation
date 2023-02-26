@@ -1,5 +1,5 @@
 use crate::{
-    particle::Particle,
+    particle::{self, Particle},
     quadtree::{QuadTree, AABB},
 };
 use sdl2::{pixels::Color, rect::Rect, render::Canvas, video::Window};
@@ -38,8 +38,10 @@ pub fn draw_query(
     range: &AABB,
     points: &Vec<Particle>,
 ) {
+    let main_rect = aabb_to_rect(range);
+
     canvas.set_draw_color(QUERY_COLOR);
-    canvas.draw_rect(aabb_to_rect(range)).unwrap();
+    canvas.draw_rect(main_rect).unwrap();
 
     let pts = qt.query_range(range);
     for p in pts {
@@ -52,6 +54,10 @@ pub fn draw_query(
             ))
             .unwrap();
     }
+
+    let mut right = main_rect.center();
+    right.x += particle::MAX_DISTANCE as i32;
+    canvas.draw_line(main_rect.center(), right).unwrap();
 }
 
 fn draw_section(canvas: &mut Canvas<Window>, qt: &QuadTree) {
