@@ -1,6 +1,7 @@
 pub mod visualizer;
 
 const QT_NODE_CAPACITY: usize = 6;
+const QT_MAX_DEPTH: u16 = 6;
 
 // Simple coordinate object to represent points and vectors
 #[derive(Clone, Copy)]
@@ -47,20 +48,22 @@ pub struct QuadTree {
     pub boundary: AABB,
     points: Vec<XY>,
     points_data: Vec<usize>,
+    depth: u16,
 
     // Children
-    pub north_west: Option<Box<QuadTree>>,
-    pub north_east: Option<Box<QuadTree>>,
-    pub south_west: Option<Box<QuadTree>>,
-    pub south_east: Option<Box<QuadTree>>,
+    north_west: Option<Box<QuadTree>>,
+    north_east: Option<Box<QuadTree>>,
+    south_west: Option<Box<QuadTree>>,
+    south_east: Option<Box<QuadTree>>,
 }
 
 impl QuadTree {
-    pub fn new(boundary: AABB) -> QuadTree {
+    pub fn new(boundary: AABB, depth: u16) -> QuadTree {
         QuadTree {
             boundary,
             points: Vec::with_capacity(QT_NODE_CAPACITY),
             points_data: Vec::with_capacity(QT_NODE_CAPACITY),
+            depth,
             north_west: Option::None,
             north_east: Option::None,
             south_west: Option::None,
@@ -125,7 +128,9 @@ impl QuadTree {
 
     // Insert without checking if the point can be inserted.
     pub fn insert_internal(&mut self, p: XY, data: usize) -> bool {
-        if self.points.len() < QT_NODE_CAPACITY && self.north_west.is_none() {
+        if (self.points.len() < QT_NODE_CAPACITY || self.depth > QT_MAX_DEPTH)
+            && self.north_west.is_none()
+        {
             //TODO Try to see how push_within_capacity works.
             self.points.push(p);
             self.points_data.push(data);
@@ -177,34 +182,50 @@ impl QuadTree {
     }
 
     fn subdivide(&mut self) {
-        self.north_west = Some(Box::new(QuadTree::new(AABB {
-            center: XY {
-                x: self.boundary.center.x - self.boundary.half_dimension / 2.0,
-                y: self.boundary.center.y - self.boundary.half_dimension / 2.0,
+        if self.depth > QT_MAX_DEPTH {
+            return;
+        }
+
+        self.north_west = Some(Box::new(QuadTree::new(
+            AABB {
+                center: XY {
+                    x: self.boundary.center.x - self.boundary.half_dimension / 2.0,
+                    y: self.boundary.center.y - self.boundary.half_dimension / 2.0,
+                },
+                half_dimension: self.boundary.half_dimension / 2.0,
             },
-            half_dimension: self.boundary.half_dimension / 2.0,
-        })));
-        self.north_east = Some(Box::new(QuadTree::new(AABB {
-            center: XY {
-                x: self.boundary.center.x + self.boundary.half_dimension / 2.0,
-                y: self.boundary.center.y - self.boundary.half_dimension / 2.0,
+            self.depth + 1,
+        )));
+        self.north_east = Some(Box::new(QuadTree::new(
+            AABB {
+                center: XY {
+                    x: self.boundary.center.x + self.boundary.half_dimension / 2.0,
+                    y: self.boundary.center.y - self.boundary.half_dimension / 2.0,
+                },
+                half_dimension: self.boundary.half_dimension / 2.0,
             },
-            half_dimension: self.boundary.half_dimension / 2.0,
-        })));
-        self.south_west = Some(Box::new(QuadTree::new(AABB {
-            center: XY {
-                x: self.boundary.center.x - self.boundary.half_dimension / 2.0,
-                y: self.boundary.center.y + self.boundary.half_dimension / 2.0,
+            self.depth + 1,
+        )));
+        self.south_west = Some(Box::new(QuadTree::new(
+            AABB {
+                center: XY {
+                    x: self.boundary.center.x - self.boundary.half_dimension / 2.0,
+                    y: self.boundary.center.y + self.boundary.half_dimension / 2.0,
+                },
+                half_dimension: self.boundary.half_dimension / 2.0,
             },
-            half_dimension: self.boundary.half_dimension / 2.0,
-        })));
-        self.south_east = Some(Box::new(QuadTree::new(AABB {
-            center: XY {
-                x: self.boundary.center.x + self.boundary.half_dimension / 2.0,
-                y: self.boundary.center.y + self.boundary.half_dimension / 2.0,
+            self.depth + 1,
+        )));
+        self.south_east = Some(Box::new(QuadTree::new(
+            AABB {
+                center: XY {
+                    x: self.boundary.center.x + self.boundary.half_dimension / 2.0,
+                    y: self.boundary.center.y + self.boundary.half_dimension / 2.0,
+                },
+                half_dimension: self.boundary.half_dimension / 2.0,
             },
-            half_dimension: self.boundary.half_dimension / 2.0,
-        })));
+            self.depth + 1,
+        )));
     }
 }
 

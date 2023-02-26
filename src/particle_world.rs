@@ -21,13 +21,13 @@ impl ParticleWorld {
                 center: XY { x: 0.0, y: 0.0 },
                 half_dimension: range_size,
             },
-            tree: QuadTree::new(AABB::new(400.0, 400.0, 400.0)),
+            tree: QuadTree::new(AABB::new(400.0, 400.0, 400.0), 0),
         }
     }
 
     pub fn update(&mut self, rules: &[ParticleRule]) {
         // Update Tree
-        self.tree = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
+        self.tree = QuadTree::new(AABB::new(400.0, 400.0, 400.0), 0);
         for (i, p) in self.particles.iter().enumerate() {
             self.tree.insert(p.pos, i);
         }
