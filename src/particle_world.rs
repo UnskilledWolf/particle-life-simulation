@@ -40,9 +40,12 @@ impl ParticleWorld {
 
             self.range.center.x = p.pos.x;
             self.range.center.y = p.pos.y;
+
+            let in_range = self.tree.query_range(&self.range);
+            let distances = ParticleRule::get_distances(&p, &in_range, &self.particles);
+
             for r in rules {
-                let in_range = self.tree.query_range(&self.range);
-                r.run(&mut p, in_range, &self.particles);
+                r.run(&mut p, &in_range, &self.particles, &distances);
             }
 
             new_particles.push(p)
