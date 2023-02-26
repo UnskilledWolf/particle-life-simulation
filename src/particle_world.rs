@@ -2,6 +2,7 @@ use rand::prelude::*;
 use sdl2::{pixels::Color, render::Canvas, video::Window};
 
 use crate::{
+    grid::ParticleGrid,
     particle::{Particle, ParticleColor, ParticleRule},
     quadtree::visualizer,
     quadtree::{QuadTree, AABB, XY},
@@ -27,14 +28,17 @@ impl ParticleWorld {
 
     pub fn update(&mut self, rules: &[ParticleRule]) {
         // Update Tree
-        self.tree = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
+        // self.tree = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
+        // for p in &self.particles {
+        //     let pc = p.clone();
+        //     self.tree.insert(pc.pos, pc);
+        // }
+        let mut grid = ParticleGrid::new();
         for p in &self.particles {
-            let pc = p.clone();
-            self.tree.insert(pc.pos, pc);
+            grid.insert(c);
         }
 
         // Update particles
-
         for p in &mut self.particles {
             self.range.center.x = p.pos.x;
             self.range.center.y = p.pos.y;
