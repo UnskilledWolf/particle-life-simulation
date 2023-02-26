@@ -43,20 +43,20 @@ impl AABB {
     }
 }
 
-pub struct QuadTree<T> {
+pub struct QuadTree {
     pub boundary: AABB,
     points: Vec<XY>,
-    points_data: Vec<T>,
+    points_data: Vec<usize>,
 
     // Children
-    pub north_west: Option<Box<QuadTree<T>>>,
-    pub north_east: Option<Box<QuadTree<T>>>,
-    pub south_west: Option<Box<QuadTree<T>>>,
-    pub south_east: Option<Box<QuadTree<T>>>,
+    pub north_west: Option<Box<QuadTree>>,
+    pub north_east: Option<Box<QuadTree>>,
+    pub south_west: Option<Box<QuadTree>>,
+    pub south_east: Option<Box<QuadTree>>,
 }
 
-impl<T> QuadTree<T> {
-    pub fn new(boundary: AABB) -> QuadTree<T> {
+impl QuadTree {
+    pub fn new(boundary: AABB) -> QuadTree {
         QuadTree {
             boundary,
             points: Vec::with_capacity(QT_NODE_CAPACITY),
@@ -68,7 +68,7 @@ impl<T> QuadTree<T> {
         }
     }
 
-    pub fn insert(&mut self, p: XY, data: T) -> bool {
+    pub fn insert(&mut self, p: XY, data: usize) -> bool {
         if self.boundary.contains_point(&p) {
             return self.insert_internal(p, data);
         } else {
@@ -76,8 +76,8 @@ impl<T> QuadTree<T> {
         }
     }
 
-    pub fn query_range(&self, range: &AABB) -> Vec<&T> {
-        let mut results: Vec<&T> = Vec::new();
+    pub fn query_range(&self, range: &AABB) -> Vec<usize> {
+        let mut results: Vec<usize> = Vec::new();
 
         // Return nothing if the range does not intersect
         if !self.boundary.intersects_aabb(range) {
@@ -87,7 +87,7 @@ impl<T> QuadTree<T> {
         // Scan this level
         for (i, p) in self.points.iter().enumerate() {
             if range.contains_point(&p) {
-                results.push(&self.points_data[i]);
+                results.push(self.points_data[i]);
             }
         }
 
@@ -124,7 +124,7 @@ impl<T> QuadTree<T> {
     }
 
     // Insert without checking if the point can be inserted.
-    pub fn insert_internal(&mut self, p: XY, data: T) -> bool {
+    pub fn insert_internal(&mut self, p: XY, data: usize) -> bool {
         if self.points.len() < QT_NODE_CAPACITY && self.north_west.is_none() {
             //TODO Try to see how push_within_capacity works.
             self.points.push(p);

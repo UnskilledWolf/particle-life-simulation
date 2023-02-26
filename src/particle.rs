@@ -38,7 +38,7 @@ pub struct ParticleRule {
 }
 
 impl ParticleRule {
-    pub fn run(&self, p1: &mut Particle, particles: &Vec<&Particle>) {
+    pub fn run(&self, p1: &mut Particle, in_range: Vec<usize>, particles: &Vec<Particle>) {
         if p1.color != self.from {
             return;
         }
@@ -46,7 +46,8 @@ impl ParticleRule {
         let mut fx: f32 = 0.0;
         let mut fy: f32 = 0.0;
 
-        for p2 in particles {
+        for p2_index in in_range {
+            let p2 = particles[p2_index];
             let dx: f32 = (p1.pos.x - p2.pos.x) as f32;
             let dy: f32 = (p1.pos.y - p2.pos.y) as f32;
 

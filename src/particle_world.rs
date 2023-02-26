@@ -2,7 +2,6 @@ use rand::prelude::*;
 use sdl2::{pixels::Color, render::Canvas, video::Window};
 
 use crate::{
-    grid::ParticleGrid,
     particle::{Particle, ParticleColor, ParticleRule},
     quadtree::visualizer,
     quadtree::{QuadTree, AABB, XY},
@@ -11,7 +10,7 @@ use crate::{
 pub struct ParticleWorld {
     particles: Vec<Particle>,
     range: AABB,
-    tree: QuadTree<Particle>,
+    tree: QuadTree,
 }
 
 impl ParticleWorld {
@@ -28,25 +27,28 @@ impl ParticleWorld {
 
     pub fn update(&mut self, rules: &[ParticleRule]) {
         // Update Tree
-        // self.tree = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
-        // for p in &self.particles {
-        //     let pc = p.clone();
-        //     self.tree.insert(pc.pos, pc);
-        // }
-        let mut grid = ParticleGrid::new();
-        for p in &self.particles {
-            grid.insert(c);
+        self.tree = QuadTree::new(AABB::new(400.0, 400.0, 400.0));
+        for (i, p) in self.particles.iter().enumerate() {
+            self.tree.insert(p.pos, i);
         }
 
+        let mut new_particles: Vec<Particle> = Vec::new();
+
         // Update particles
-        for p in &mut self.particles {
+        for particle in &self.particles {
+            let mut p = particle.clone();
+
             self.range.center.x = p.pos.x;
             self.range.center.y = p.pos.y;
             for r in rules {
                 let in_range = self.tree.query_range(&self.range);
-                r.run(p, &in_range);
+                r.run(&mut p, in_range, &self.particles);
             }
+
+            new_particles.push(p)
         }
+
+        self.particles = new_particles;
     }
 
     pub fn draw(&self, canvas: &mut Canvas<Window>) {
@@ -57,7 +59,7 @@ impl ParticleWorld {
 
     pub fn draw_debug(&self, canvas: &mut Canvas<Window>, test_query: &AABB) {
         visualizer::draw_quadtree(canvas, &self.tree);
-        visualizer::draw_query(canvas, &self.tree, test_query);
+        visualizer::draw_query(canvas, &self.tree, test_query, &self.particles);
     }
 }
 

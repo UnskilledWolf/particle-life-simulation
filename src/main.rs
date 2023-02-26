@@ -5,7 +5,6 @@ use sdl2::event::Event;
 use sdl2::pixels::Color;
 use std::time::Instant;
 
-mod grid;
 mod particle;
 mod particle_world;
 mod quadtree;
