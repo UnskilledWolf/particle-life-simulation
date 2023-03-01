@@ -25,25 +25,30 @@ impl ParticleWorld {
         }
     }
 
+    // Update all particles based on the rules
     pub fn update(&mut self, rules: &[ParticleRule]) {
-        // Update Tree
+        // Re-Initialize Tree with new particle positions
         self.tree = QuadTree::new(AABB::new(400.0, 400.0, 400.0), 0);
         for (i, p) in self.particles.iter().enumerate() {
             self.tree.insert(p.pos, i);
         }
 
+        // The Particles at their new positions
         let mut new_particles: Vec<Particle> = Vec::new();
 
         // Update particles
         for particle in &self.particles {
+            // The new particle
             let mut p = particle.clone();
 
             self.range.center.x = p.pos.x;
             self.range.center.y = p.pos.y;
 
+            // Cache in range particle indexes and distances
             let in_range = self.tree.query_range(&self.range);
             let distances = ParticleRule::get_distances(&p, &in_range, &self.particles);
 
+            // Compute all rules
             for r in rules {
                 r.run(&mut p, &in_range, &self.particles, &distances);
             }
@@ -51,9 +56,11 @@ impl ParticleWorld {
             new_particles.push(p)
         }
 
+        // Overwrite the old particles
         self.particles = new_particles;
     }
 
+    // Draw all particles
     pub fn draw(&self, canvas: &mut Canvas<Window>) {
         for p in &self.particles {
             p.draw(canvas);
@@ -66,6 +73,7 @@ impl ParticleWorld {
     }
 }
 
+// Create new particles at random positions
 pub fn create_particles(number: i32, color: ParticleColor, draw_color: Color) -> Vec<Particle> {
     let mut group: Vec<Particle> = Vec::new();
     let mut rng = rand::thread_rng();

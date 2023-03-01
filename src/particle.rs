@@ -2,6 +2,7 @@ use sdl2::{gfx::primitives::DrawRenderer, pixels::Color, render::Canvas, video::
 
 use crate::quadtree::XY;
 
+// The Maximum distance that a particle can interact with another
 pub const MAX_DISTANCE: f32 = 80.0;
 
 #[derive(Clone, Copy, PartialEq)]
@@ -40,6 +41,7 @@ pub struct ParticleRule {
 }
 
 impl ParticleRule {
+    // Get the distance from this particle to all particles in range. Accesses the particles list using the in_range indexes list
     pub fn get_distances(
         p1: &Particle,
         in_range: &Vec<usize>,
@@ -59,6 +61,7 @@ impl ParticleRule {
         return output;
     }
 
+    // Run this rule on one particle, considering the in range particle indexes given
     pub fn run(
         &self,
         p1: &mut Particle,
@@ -66,10 +69,12 @@ impl ParticleRule {
         particles: &Vec<Particle>,
         distances: &Vec<f32>,
     ) {
+        // Skip if this rules does not apply to this particle
         if p1.color != self.from {
             return;
         }
 
+        // Math taken from video. See README
         let mut fx: f32 = 0.0;
         let mut fy: f32 = 0.0;
 

@@ -5,7 +5,6 @@ use sdl2::event::Event;
 use sdl2::pixels::Color;
 use std::time::Instant;
 
-// mod grid;
 mod particle;
 mod particle_world;
 mod quadtree;
@@ -14,7 +13,7 @@ fn main() -> Result<(), String> {
     let width = 800;
     let height = 800;
 
-    // System
+    // Initialize SDL2
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
     let window = video_subsystem
@@ -24,7 +23,7 @@ fn main() -> Result<(), String> {
         .expect("Failed to build window!");
     let mut canvas = window.into_canvas().build().unwrap();
 
-    // Events
+    // Initialize Events
     let mut event_queue = sdl_context.event_pump().unwrap();
 
     // Initialize Rules
@@ -66,7 +65,7 @@ fn main() -> Result<(), String> {
         },
     ];
 
-    // Initialize World
+    // Initialize Particle World
     let mut particles: Vec<Particle> = Vec::new();
     particles.append(&mut particle_world::create_particles(
         500,
@@ -91,8 +90,9 @@ fn main() -> Result<(), String> {
     // Main Loop
     let mut running = true;
     while running {
+        let start_time = Instant::now();
+
         // Events
-        let start = Instant::now();
         for event in event_queue.poll_iter() {
             match event {
                 Event::Quit { .. } => running = false,
@@ -115,8 +115,8 @@ fn main() -> Result<(), String> {
 
         canvas.present();
 
-        let duration = start.elapsed();
-
+        // Print Duration
+        let duration = start_time.elapsed();
         println!("Time elapsed in frame is: {:?}", duration);
 
         // Calculate average time

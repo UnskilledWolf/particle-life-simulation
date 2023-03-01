@@ -1,6 +1,8 @@
 pub mod visualizer;
 
+// The maximum amount of points in one quad
 const QT_NODE_CAPACITY: usize = 6;
+// The maximum depth of nested quads
 const QT_MAX_DEPTH: u16 = 6;
 
 // Simple coordinate object to represent points and vectors
@@ -71,7 +73,9 @@ impl QuadTree {
         }
     }
 
+    // Insert a new index into the tree
     pub fn insert(&mut self, p: XY, data: usize) -> bool {
+        // If the point is within range of this quad, try to insert it. Otherwise skip
         if self.boundary.contains_point(&p) {
             return self.insert_internal(p, data);
         } else {
@@ -128,6 +132,7 @@ impl QuadTree {
 
     // Insert without checking if the point can be inserted.
     pub fn insert_internal(&mut self, p: XY, data: usize) -> bool {
+        // Insert the point if there is space or this is at the max depth
         if (self.points.len() < QT_NODE_CAPACITY || self.depth > QT_MAX_DEPTH)
             && self.north_west.is_none()
         {
@@ -137,6 +142,7 @@ impl QuadTree {
             return true;
         }
 
+        // Subdivide is the point is not able to be inserted otherwise
         if self.north_west.is_none() {
             self.subdivide();
         }
@@ -181,7 +187,9 @@ impl QuadTree {
         return false;
     }
 
+    // Subdivide this quad
     fn subdivide(&mut self) {
+        // Skip the subdivision is this is at max depth
         if self.depth > QT_MAX_DEPTH {
             return;
         }
